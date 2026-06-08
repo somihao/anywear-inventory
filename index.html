@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anywear 庫存系統</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif; background: #f5f4f0; color: #1a1a1a; }
+.wrap { max-width: 800px; margin: 0 auto; padding: 1.5rem 1rem; }
+h1 { font-size: 20px; font-weight: 600; margin-bottom: 1.5rem; }
+.tabs { display: flex; gap: 6px; margin-bottom: 1.5rem; }
+.tab { padding: 8px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; border: 1px solid #ddd; background: white; color: #666; }
+.tab.active { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+.legend { display: flex; gap: 16px; margin-bottom: 1rem; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #666; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-green { background: #3B6D11; }
+.dot-amber { background: #BA7517; }
+.dot-red { background: #A32D2D; }
+.section-title { font-size: 11px; font-weight: 600; color: #999; margin: 1.2rem 0 0.6rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-bottom: 0.5rem; }
+.card { background: white; border: 1px solid #e8e8e8; border-radius: 12px; padding: 12px 14px; position: relative; }
+.card:hover { border-color: #ccc; }
+.card-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+.card-packs { font-size: 22px; font-weight: 600; color: #1a1a1a; }
+.card-unit { font-size: 12px; color: #888; font-weight: 400; }
+.card-pieces { font-size: 11px; color: #bbb; margin-top: 2px; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; position: absolute; top: 12px; right: 12px; }
+.s-green { background: #639922; }
+.s-amber { background: #BA7517; }
+.s-red { background: #A32D2D; }
+.alert-banner { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.alert-red { background: #FCEBEB; color: #791F1F; border: 1px solid #F09595; }
+.alert-amber { background: #FAEEDA; color: #633806; border: 1px solid #FAC775; }
+.divider { border: none; border-top: 1px solid #eee; margin: 1.5rem 0; }
+.action-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1rem; }
+.action-row select, .action-row input { height: 38px; border-radius: 8px; border: 1px solid #ddd; background: white; color: #1a1a1a; font-size: 14px; padding: 0 10px; }
+.action-row select { min-width: 150px; }
+.action-row input { width: 90px; }
+.action-row label { font-size: 12px; color: #888; display: block; margin-bottom: 4px; }
+.btn { height: 38px; padding: 0 18px; border-radius: 8px; font-size: 14px; cursor: pointer; border: 1px solid #ddd; background: white; color: #1a1a1a; }
+.btn:hover { background: #f5f5f5; }
+.btn-in { border-color: #639922; color: #3B6D11; background: #EAF3DE; }
+.btn-out { border-color: #BA7517; color: #633806; background: #FAEEDA; }
+.log-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.log-table th { text-align: left; color: #888; font-weight: 500; padding: 8px; border-bottom: 1px solid #eee; }
+.log-table td { padding: 8px; border-bottom: 1px solid #f0f0f0; color: #1a1a1a; }
+.tag-in { color: #3B6D11; font-weight: 600; }
+.tag-out { color: #A32D2D; font-weight: 600; }
+.empty-log { color: #bbb; font-size: 13px; text-align: center; padding: 2rem 0; }
+.page { display: none; }
+.page.active { display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>好實再 Anywear 庫存系統</h1>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('female')">女生款</button>
+    <button class="tab" onclick="switchTab('male')">男生款</button>
+    <button class="tab" onclick="switchTab('log')">進出貨紀錄</button>
+  </div>
+  <div id="tab-female" class="page active">
+    <div id="alerts-female"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="dot dot-green"></div>庫存充足</div>
+      <div class="legend-item"><div class="dot dot-amber"></div>準備叫貨</div>
+      <div class="legend-item"><div class="dot dot-red"></div>緊急補貨</div>
+    </div>
+    <div class="section-title">茱萸粉</div>
+    <div class="grid" id="grid-pink"></div>
+    <div class="section-title">燕麥奶黃</div>
+    <div class="grid" id="grid-yellow"></div>
+    <div class="section-title">鼠尾草綠</div>
+    <div class="grid" id="grid-green"></div>
+    <hr class="divider">
+    <div class="section-title">調整庫存</div>
+    <div class="action-row">
+      <div><label>SKU</label><select id="f-sku"></select></div>
+      <div><label>包數</label><input type="number" id="f-qty" value="1" min="1" /></div>
+      <div><label>&nbsp;</label><button class="btn btn-in" onclick="adjust('female','in')">＋ 進貨</button></div>
+      <div><label>&nbsp;</label><button class="btn btn-out" onclick="adjust('female','out')">－ 出貨</button></div>
+    </div>
+  </div>
+  <div id="tab-male" class="page">
+    <div id="alerts-male"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="dot dot-green"></div>庫存充足</div>
+      <div class="legend-item"><div class="dot dot-amber"></div>準備叫貨</div>
+      <div class="legend-item"><div class="dot dot-red"></div>緊急補貨</div>
+    </div>
+    <div class="section-title">大象灰</div>
+    <div class="grid" id="grid-male"></div>
+    <hr class="divider">
+    <div class="section-title">調整庫存</div>
+    <div class="action-row">
+      <div><label>SKU</label><select id="m-sku"></select></div>
+      <div><label>組數</label><input type="number" id="m-qty" value="1" min="1" /></div>
+      <div><label>&nbsp;</label><button class="btn btn-in" onclick="adjust('male','in')">＋ 進貨</button></div>
+      <div><label>&nbsp;</label><button class="btn btn-out" onclick="adjust('male','out')">－ 出貨</button></div>
+    </div>
+  </div>
+  <div id="tab-log" class="page">
+    <div id="log-content"></div>
+  </div>
+</div>
+<script>
+const PACK_F=10,PACK_M=4;
+const femaleInit={'粉-S':44,'粉-M':202,'粉-L':183,'粉-XL':107,'粉-2XL':95,'黃-S':37,'黃-M':171,'黃-L':155,'黃-XL':91,'黃-2XL':80,'綠-S':19,'綠-M':55,'綠-L':119,'綠-XL':70,'綠-2XL':61};
+const maleInit={'灰-M':190,'灰-L':378,'灰-XL':590,'灰-2XL':327};
+const colorMap={'粉':'茱萸粉','黃':'燕麥奶黃','綠':'鼠尾草綠','灰':'大象灰'};
+const WARN_F=150,RED_F=50,WARN_M=100,RED_M=30;
+function loadData(){try{const s=localStorage.getItem('anywear_inv');if(s)return JSON.parse(s);}catch(e){}return{inv:{...femaleInit,...maleInit},logs:[]};}
+function saveData(){try{localStorage.setItem('anywear_inv',JSON.stringify({inv,logs}));}catch(e){}}
+let{inv,logs}=loadData();
+function isMale(sku){return sku.startsWith('灰');}
+function packSize(sku){return isMale(sku)?PACK_M:PACK_F;}
+function status(sku,pkgs){const warn=isMale(sku)?WARN_M:WARN_F,red=isMale(sku)?RED_M:RED_F;return pkgs<=red?'red':pkgs<=warn?'amber':'green';}
+function cardHTML(sku){const pkgs=inv[sku],pieces=pkgs*packSize(sku),st=status(sku,pkgs),size=sku.split('-')[1],unit=isMale(sku)?'組':'包';return`<div class="status-dot s-${st}"></div><div class="card-label">${size}</div><div class="card-packs">${pkgs} <span class="card-unit">${unit}</span></div><div class="card-pieces">${pieces.toLocaleString()} 件</div>`;}
+function renderCard(sku,container){const card=document.createElement('div');card.className='card';card.id='card-'+sku;card.innerHTML=cardHTML(sku);container.appendChild(card);}
+function updateCard(sku){const el=document.getElementById('card-'+sku);if(el)el.innerHTML=cardHTML(sku);}
+function renderAlerts(gender){const keys=gender==='female'?Object.keys(femaleInit):Object.keys(maleInit);const reds=[],ambers=[];keys.forEach(sku=>{const st=status(sku,inv[sku]),label=colorMap[sku.split('-')[0]]+' '+sku.split('-')[1];if(st==='red')reds.push(label);else if(st==='amber')ambers.push(label);});const el=document.getElementById('alerts-'+gender);el.innerHTML='';if(reds.length)el.innerHTML+=`<div class="alert-banner alert-red">⚠ 緊急補貨：${reds.join('、')}</div>`;if(ambers.length)el.innerHTML+=`<div class="alert-banner alert-amber">⏰ 準備叫貨（前置1.5個月）：${ambers.join('、')}</div>`;}
+function buildSelects(){const fs=document.getElementById('f-sku');Object.keys(femaleInit).forEach(sku=>{const o=document.createElement('option');o.value=sku;o.textContent=colorMap[sku.split('-')[0]]+' '+sku.split('-')[1];fs.appendChild(o);});const ms=document.getElementById('m-sku');Object.keys(maleInit).forEach(sku=>{const o=document.createElement('option');o.value=sku;o.textContent='大象灰 '+sku.split('-')[1];ms.appendChild(o);});}
+function adjust(gender,dir){const skuEl=document.getElementById(gender==='female'?'f-sku':'m-sku'),qtyEl=document.getElementById(gender==='female'?'f-qty':'m-qty'),sku=skuEl.value,qty=parseInt(qtyEl.value)||1;if(dir==='out'&&inv[sku]<qty){alert('庫存不足！');return;}inv[sku]+=dir==='in'?qty:-qty;const now=new Date(),ts=`${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,label=colorMap[sku.split('-')[0]]+' '+sku.split('-')[1],unit=isMale(sku)?'組':'包';logs.unshift({ts,label,dir,qty,pieces:qty*packSize(sku),unit});saveData();updateCard(sku);renderAlerts(gender);renderLog();qtyEl.value=1;}
+function renderLog(){const el=document.getElementById('log-content');if(!logs.length){el.innerHTML='<p class="empty-log">尚無紀錄</p>';return;}const rows=logs.map(l=>`<tr><td>${l.ts}</td><td>${l.label}</td><td class="${l.dir==='in'?'tag-in':'tag-out'}">${l.dir==='in'?'▲ 進貨':'▼ 出貨'}</td><td>${l.qty} ${l.unit}</td><td>${l.pieces.toLocaleString()} 件</td></tr>`).join('');el.innerHTML=`<table class="log-table"><thead><tr><th>時間</th><th>SKU</th><th>類型</th><th>數量</th><th>件數</th></tr></thead><tbody>${rows}</tbody></table>`;}
+function switchTab(name){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');document.querySelectorAll('.tab').forEach((btn,i)=>btn.classList.toggle('active',['female','male','log'][i]===name));if(name==='log')renderLog();}
+['粉','黃','綠'].forEach(color=>{const id=color==='粉'?'pink':color==='黃'?'yellow':'green';['S','M','L','XL','2XL'].forEach(size=>renderCard(color+'-'+size,document.getElementById('grid-'+id)));});
+['M','L','XL','2XL'].forEach(size=>renderCard('灰-'+size,document.getElementById('grid-male')));
+buildSelects();renderAlerts('female');renderAlerts('male');renderLog();
+</script>
+</body>
+</html>
