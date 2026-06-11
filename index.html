@@ -326,7 +326,7 @@ const colorMap = {'粉':'茱萸粉','黃':'燕麥奶黃','綠':'鼠尾草綠','�
 const colorDot = {'粉':'#E8A0BF','黃':'#F5C842','綠':'#7AB648','灰':'#AAAAAA'};
 const WARN_F=100,RED_F=30,WARN_M=80,RED_M=20;
 
-let inv={}, logs=[], currentAdminUser='', invSnapshot={};
+let inv={}, logs=[], currentAdminUser='', invSnapshot={}, isSaving=false;
 
 function totalPieces(sku,d){
   if(sku.startsWith('灰'))return(d.p4||0)*4;
@@ -554,6 +554,7 @@ window.lockAdmin=function(){
   document.getElementById('pw-err').style.display='none';
 }
 window.saveAdmin=async function(){
+  isSaving=true;
   document.getElementById('save-success').style.display='none';
   // 建立 diff 紀錄
   const allSkus=[...Object.keys(femaleInit),...Object.keys(maleInit)];
@@ -577,7 +578,10 @@ window.saveAdmin=async function(){
   await save();
   renderAllCards();renderLog();
   document.getElementById('save-success').style.display='block';
-  setTimeout(()=>document.getElementById('save-success').style.display='none',3000);
+  setTimeout(()=>{
+    document.getElementById('save-success').style.display='none';
+    isSaving=false;
+  },3000);
   document.querySelectorAll('.admin-input').forEach(inp=>inp.classList.remove('changed'));
   invSnapshot=JSON.parse(JSON.stringify(inv));
   document.getElementById('diff-preview').style.display='none';
@@ -692,6 +696,7 @@ window.doIn=async function(){
 buildSelects();
 const ref=doc(db,'inventory','data');
 onSnapshot(ref,snap=>{
+  if(isSaving) return;
   if(snap.exists()){
     const data=snap.data();
     inv=data.inv||{};logs=data.logs||[];
