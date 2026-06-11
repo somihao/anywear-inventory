@@ -697,24 +697,35 @@ buildSelects();
 const ref=doc(db,'inventory','data');
 onSnapshot(ref,snap=>{
   if(isSaving) return;
+  const adminOpen = document.getElementById('admin-content').style.display!=='none';
   if(snap.exists()){
     const data=snap.data();
-    inv=data.inv||{};logs=data.logs||[];
+    const newInv=data.inv||{};
+    // 只有在後台沒開的時候才更新 inv
+    if(!adminOpen){
+      inv=newInv;
+      logs=data.logs||[];
+    } else {
+      // 後台開著，只更新 logs，不動 inv
+      logs=data.logs||[];
+    }
     if(!Object.keys(inv).length){
       Object.entries(femaleInit).forEach(([k,v])=>inv[k]={...v});
       Object.entries(maleInit).forEach(([k,v])=>inv[k]={...v});
     }
   } else {
-    inv={};
-    Object.entries(femaleInit).forEach(([k,v])=>inv[k]={...v});
-    Object.entries(maleInit).forEach(([k,v])=>inv[k]={...v});
-    logs=[];
-    setDoc(ref,{inv,logs,updatedAt:new Date().toISOString()});
+    if(!adminOpen){
+      inv={};
+      Object.entries(femaleInit).forEach(([k,v])=>inv[k]={...v});
+      Object.entries(maleInit).forEach(([k,v])=>inv[k]={...v});
+      logs=[];
+      setDoc(ref,{inv,logs,updatedAt:new Date().toISOString()});
+    }
   }
   renderAllCards();renderLog();
   document.getElementById('sync-status').textContent='✓ 即時同步中';
   document.getElementById('sync-status').className='sync ok';
-  if(document.getElementById('admin-content').style.display!=='none')renderAdminTable();
+  if(!adminOpen && !isSaving) renderAllCards();
 },err=>{
   document.getElementById('sync-status').textContent='⚠ 連線失敗';
   document.getElementById('sync-status').className='sync err';
