@@ -130,7 +130,7 @@ hr.dv{border:none;border-top:1px solid #eee;margin:1.3rem 0}
     </div>
     <div class="fr">
       <div class="fg"><label>組合類型</label>
-        <select id="co" onchange="SC()"><option value="">選擇組合</option><option value="10f">女生 10入（單色）</option><option value="5f">女生 5入（單色）</option><option value="3f">女生 3入（三色各1）</option><option value="4m">男生 4入（單色）</option><option value="custom">自訂</option></select>
+        <select id="co" onchange="SC()"><option value="">選擇組合</option><option value="10f">女生 10入（單色）</option><option value="5f">女生 5入（單色）</option><option value="3f">女生 3入（三色各1）</option><option value="15f">女生 15入（三色各5）</option><option value="4m">男生 4入（單色）</option><option value="20m">男生 20入（單色）</option><option value="custom">自訂</option></select>
       </div>
       <div class="fg" id="qg" style="display:none"><label>數量</label><input type="number" id="oq" value="1" min="1"/></div>
       <div class="fg" id="clg" style="display:none"><label>顏色尺寸</label><select id="os"></select></div>
@@ -144,7 +144,7 @@ hr.dv{border:none;border-top:1px solid #eee;margin:1.3rem 0}
     <div class="fr">
       <div class="fg"><label>操作人員</label><select id="ip"><option value="">選擇人員</option><option>33</option><option>小暄</option><option>子昀</option><option>靜姐</option></select></div>
       <div class="fg"><label>SKU</label><select id="is"></select></div>
-      <div class="fg"><label>包型</label><select id="ipt"><option value="10">10入包</option><option value="5">5入包</option><option value="3">3入包</option><option value="4">4入組（男）</option></select></div>
+      <div class="fg"><label>包型</label><select id="ipt"><option value="10">10入包</option><option value="5">5入包</option><option value="3">3入包</option><option value="4">4入組（男）</option><option value="20">20入組（男）</option></select></div>
       <div class="fg"><label>數量</label><input type="number" id="iq" value="1" min="1"/></div>
       <div class="fg"><label>&nbsp;</label><button class="btn btn-in" onclick="DI()">✓ 確認進貨</button></div>
     </div>
@@ -319,8 +319,10 @@ function RAT(){
       const row=document.createElement('tr');
       if(im){
         row.innerHTML=`<td class="sku-lbl"><span class="cdot" style="background:${CD[co]}"></span>${CM[co]} ${sz}</td>
-          <td>—</td><td>—</td><td>—</td>
-          <td><input class="ai" data-sku="${sku}" data-pk="p4" type="number" min="0" value="${d.p4||0}"/> 組</td>
+          <td><input class="ai" data-sku="${sku}" data-pk="p4" type="number" min="0" value="${d.p4||0}"/> 組(4入)</td>
+          <td><input class="ai" data-sku="${sku}" data-pk="p20" type="number" min="0" value="${d.p20||0}"/> 組(20入)</td>
+          <td>—</td>
+          <td style="font-weight:500" id="atp-${sku}">${tp(sku,d)} 組</td>
           <td style="color:#999;font-size:12px" id="ap-${sku}">${tc(sku,d).toLocaleString()} 件</td>
           <td><span class="sc sc-${st(sku,d)}" id="as-${sku}">${sl(st(sku,d))}</span></td>`;
       } else {
@@ -358,7 +360,10 @@ function UDP(){
   Object.keys(DEF).forEach(sku=>{
     const o=snap0[sku]||{};const c=inv[sku]||{};const im=sku.startsWith('灰');
     const lb=CM[sku.split('-')[0]]+' '+sku.split('-')[1];
-    if(im){if((o.p4||0)!==(c.p4||0))diffs.push({lb,pk:'4入組',b:o.p4||0,a:c.p4||0});}
+    if(im){
+      if((o.p4||0)!==(c.p4||0))diffs.push({lb,pk:'4入組',b:o.p4||0,a:c.p4||0});
+      if((o.p20||0)!==(c.p20||0))diffs.push({lb,pk:'20入組',b:o.p20||0,a:c.p20||0});
+    }
     else{
       if((o.p10||0)!==(c.p10||0))diffs.push({lb,pk:'10入包',b:o.p10||0,a:c.p10||0});
       if((o.p5||0)!==(c.p5||0))diffs.push({lb,pk:'5入包',b:o.p5||0,a:c.p5||0});
@@ -622,7 +627,10 @@ window.SA=async function(){
   Object.keys(DEF).forEach(sku=>{
     const o=snap0[sku]||{};const c=inv[sku]||{};const im=sku.startsWith('灰');
     const lb=CM[sku.split('-')[0]]+' '+sku.split('-')[1];
-    if(im){if((o.p4||0)!==(c.p4||0))diffs.push(`${lb} 4入組:${o.p4||0}→${c.p4||0}`);}
+    if(im){
+      if((o.p4||0)!==(c.p4||0))diffs.push(`${lb} 4入組:${o.p4||0}→${c.p4||0}`);
+      if((o.p20||0)!==(c.p20||0))diffs.push(`${lb} 20入組:${o.p20||0}→${c.p20||0}`);
+    }
     else{
       if((o.p10||0)!==(c.p10||0))diffs.push(`${lb} 10入:${o.p10||0}→${c.p10||0}`);
       if((o.p5||0)!==(c.p5||0))diffs.push(`${lb} 5入:${o.p5||0}→${c.p5||0}`);
@@ -645,10 +653,10 @@ window.TN=function(){document.getElementById('ng').style.display=document.getEle
 
 window.SC=function(){
   const co=document.getElementById('co').value;
-  document.getElementById('qg').style.display=['10f','5f','4m'].includes(co)?'flex':'none';
+  document.getElementById('qg').style.display=['10f','5f','4m','20m'].includes(co)?'flex':'none';
   document.getElementById('clg').style.display=['10f','5f'].includes(co)?'flex':'none';
-  document.getElementById('s3g').style.display=co==='3f'?'flex':'none';
-  document.getElementById('mg').style.display=co==='4m'?'flex':'none';
+  document.getElementById('s3g').style.display=['3f','15f'].includes(co)?'flex':'none';
+  document.getElementById('mg').style.display=['4m','20m'].includes(co)?'flex':'none';
   const cb=document.getElementById('cb');
   if(co==='custom'){cb.classList.add('show');BCR();}else{cb.classList.remove('show');}
 }
@@ -659,7 +667,8 @@ function BCR(){
     const im=sku.startsWith('灰');const lb=CM[sku.split('-')[0]]+' '+sku.split('-')[1];
     const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap';
     row.innerHTML=`<span style="font-size:12px;color:#666;min-width:80px">${lb}</span>
-      ${im?`<input type="number" class="cqty" data-sku="${sku}" data-pack="4" value="0" min="0" placeholder="4入組"/>`:
+      ${im?`<input type="number" class="cqty" data-sku="${sku}" data-pack="4" value="0" min="0" placeholder="4入組"/>
+         <input type="number" class="cqty" data-sku="${sku}" data-pack="20" value="0" min="0" placeholder="20入組"/>`:
         `<input type="number" class="cqty" data-sku="${sku}" data-pack="10" value="0" min="0" placeholder="10入"/>
          <input type="number" class="cqty" data-sku="${sku}" data-pack="5" value="0" min="0" placeholder="5入"/>
          <input type="number" class="cqty" data-sku="${sku}" data-pack="3" value="0" min="0" placeholder="3入"/>`}`;
@@ -681,6 +690,12 @@ window.DO=async function(){
     if(!ok){alert('三色3入包庫存不足！');return;}
     cs.forEach(c=>{const sku=c+'-'+sz;if(!inv[sku])inv[sku]={};inv[sku].p3=(inv[sku].p3||0)-1;UC(sku);});
     detail=`三色${sz} 各1包(3入)`;changed=true;
+  } else if(co==='15f'){
+    const sz=document.getElementById('os3').value;const cs=['粉','黃','綠'];let ok=true;
+    cs.forEach(c=>{if((inv[c+'-'+sz]?.p5||0)<1)ok=false;});
+    if(!ok){alert('三色5入包庫存不足！');return;}
+    cs.forEach(c=>{const sku=c+'-'+sz;if(!inv[sku])inv[sku]={};inv[sku].p5=(inv[sku].p5||0)-1;UC(sku);});
+    detail=`三色${sz} 各1包(5入，共15入)`;changed=true;
   } else if(['10f','5f'].includes(co)){
     const qty=parseInt(document.getElementById('oq').value)||1;const sku=document.getElementById('os').value;
     const pk=co==='10f'?'p10':'p5';const ps=co==='10f'?10:5;
@@ -692,6 +707,11 @@ window.DO=async function(){
     if((inv[sku]?.p4||0)<qty){alert('庫存不足！');return;}
     if(!inv[sku])inv[sku]={};inv[sku].p4=(inv[sku].p4||0)-qty;UC(sku);
     detail=`大象灰 ${sku.split('-')[1]} ${qty}組(4入)`;changed=true;
+  } else if(co==='20m'){
+    const qty=parseInt(document.getElementById('oq').value)||1;const sku=document.getElementById('om').value;
+    if((inv[sku]?.p20||0)<qty){alert('庫存不足！');return;}
+    if(!inv[sku])inv[sku]={};inv[sku].p20=(inv[sku].p20||0)-qty;UC(sku);
+    detail=`大象灰 ${sku.split('-')[1]} ${qty}組(20入)`;changed=true;
   } else if(co==='custom'){
     const inputs=document.querySelectorAll('#cr .cqty');let allOk=true;
     inputs.forEach(inp=>{const qty=parseInt(inp.value)||0;if(qty>0){const sku=inp.dataset.sku;const pk='p'+inp.dataset.pack;if((inv[sku]?.[pk]||0)<qty){alert(`${sku} 庫存不足！`);allOk=false;}}});
