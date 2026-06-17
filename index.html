@@ -52,6 +52,8 @@ hr.dv{border:none;border-top:1px solid #eee;margin:1.3rem 0}
 .ti{color:#3B6D11;font-weight:600}.to{color:#A32D2D;font-weight:600}.ta{color:#9B59B6;font-weight:600}
 .empty{color:#bbb;font-size:13px;text-align:center;padding:1.5rem 0}
 .page{display:none}.page.active{display:block}
+.page2{display:none}.page2.active{display:block}
+.mainpage{display:none}.mainpage.active{display:block}
 .lock-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center}
 .lock-icon{font-size:40px;margin-bottom:16px}
 .lock-input{height:40px;width:140px;border-radius:8px;border:1px solid #ddd;background:white;font-size:16px;padding:0 14px;text-align:center;letter-spacing:.2em}
@@ -78,22 +80,49 @@ hr.dv{border:none;border-top:1px solid #eee;margin:1.3rem 0}
 .gender-male.active{border-color:#3498DB;color:#2E86C1;background:#EBF5FB}
 .gender-female{border:2px solid #ddd;color:#888}
 .gender-female.active{border-color:#E8A0BF;color:#C2185B;background:#FEF0F5}
+.cal-wrap{background:white;border:1px solid #e8e8e8;border-radius:12px;padding:14px;margin-bottom:12px}
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-hdr button{background:none;border:1px solid #ddd;border-radius:6px;width:30px;height:30px;cursor:pointer;color:#666}
+.cal-title{font-size:14px;font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-dow{text-align:center;font-size:11px;color:#999;padding:4px 0;font-weight:500}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;position:relative;cursor:default;background:#fafafa}
+.cal-day.empty{background:none}
+.cal-day.holiday{background:#FCEBEB;color:#A32D2D}
+.cal-day.today{border:2px solid #1a1a1a}
+.cal-day .dnum{font-weight:500}
+.cal-day .hname{font-size:8px;color:#A32D2D;margin-top:1px}
+.cal-day.scheduled{background:#E8F4F8}
+.cal-day .ev-dot{width:5px;height:5px;border-radius:50%;background:#2E86AB;margin-top:2px}
+.event-card{background:white;border:1px solid #e8e8e8;border-radius:10px;padding:12px 14px;margin-bottom:8px;font-size:13px}
+.event-card .ev-dates{font-weight:600;color:#1a1a1a;margin-bottom:4px}
+.event-card .ev-kol{color:#2E86AB;font-weight:500}
+.event-card .ev-rate{color:#888;font-size:12px}
+.event-card .ev-note{color:#666;font-size:12px;margin-top:4px}
+.event-card .ev-del{float:right;color:#A32D2D;cursor:pointer;font-size:12px;border:1px solid #F09595;border-radius:6px;padding:2px 8px;background:#FCEBEB}
+.cal-locked-tip{font-size:11px;color:#999;text-align:center;margin-top:8px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="header">
-    <h1>好實再 Anywear 庫存系統</h1>
+    <h1>好實再 Anywear</h1>
     <div class="sync" id="sy">連接中...</div>
   </div>
   <div class="tabs">
-    <button class="tab active" onclick="ST('female')">女生款</button>
-    <button class="tab" onclick="ST('male')">男生款</button>
-    <button class="tab" onclick="ST('out')">出貨作業</button>
-    <button class="tab" onclick="ST('conv')">庫存轉換</button>
-    <button class="tab" onclick="ST('log')">紀錄</button>
-    <button class="tab tab-admin" onclick="ST('admin')">🔒 管理後台</button>
+    <button class="tab active" onclick="MAINNAV('inv')">庫存系統</button>
+    <button class="tab" onclick="MAINNAV('out')">出貨作業</button>
+    <button class="tab" onclick="MAINNAV('cal')">行事曆</button>
   </div>
+
+  <!-- ===== 主分類：庫存系統 ===== -->
+  <div id="main-inv" class="mainpage active">
+    <div class="tabs">
+      <button class="tab active" onclick="ST('female')">女生款</button>
+      <button class="tab" onclick="ST('male')">男生款</button>
+      <button class="tab" onclick="ST('conv')">庫存轉換</button>
+      <button class="tab tab-admin" onclick="ST('purchase')">🔒 進貨系統</button>
+    </div>
 
   <div id="tab-female" class="page active">
     <div id="af"></div>
@@ -117,7 +146,76 @@ hr.dv{border:none;border-top:1px solid #eee;margin:1.3rem 0}
     <div class="slabel">大象灰</div><div class="sku-grid" id="gm"></div>
   </div>
 
-  <div id="tab-out" class="page">
+  <div id="tab-conv" class="page">
+    <div class="slabel">庫存轉換（女生款 5入組 ⇄ 10入組）</div>
+    <div style="background:#f0f0f0;border-radius:8px;padding:12px 14px;font-size:12px;color:#666;margin-bottom:12px;line-height:1.6">
+      換算比例：<b>1組10入 = 2組5入</b>（同一批貨，只是重新分配給不同銷售規格）。轉換後請記得到 BigOrdr 後台手動調整對應規格的庫存數字。
+    </div>
+    <div class="fg" style="margin-bottom:12px">
+      <label>操作人員</label>
+      <select id="cvp"><option value="">選擇人員</option><option>33</option><option>小暄</option><option>子昀</option><option>靜姐</option></select>
+    </div>
+    <div class="fg" style="margin-bottom:16px">
+      <label>選擇款式</label>
+      <div style="display:flex;gap:8px">
+        <button class="gender-btn gender-male" id="gbtn-male" onclick="SWG('male')">男款</button>
+        <button class="gender-btn gender-female" id="gbtn-female" onclick="SWG('female')">女款</button>
+      </div>
+    </div>
+    <div id="conv-tables"></div>
+  </div>
+
+  <div id="tab-purchase" class="page">
+    <div class="lock-screen" id="ls">
+      <div class="lock-icon">🔐</div>
+      <div style="font-size:18px;font-weight:500;margin-bottom:6px">進貨系統</div>
+      <div style="font-size:13px;color:#999;margin-bottom:24px">請輸入您的專屬密碼</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="password" class="lock-input" id="pwi" placeholder="密碼" onkeydown="if(event.key==='Enter')CP()"/>
+        <button class="btn tab-admin" onclick="CP()">進入</button>
+      </div>
+      <div class="lock-err" id="pe">密碼錯誤，請再試一次</div>
+    </div>
+    <div id="ac" style="display:none">
+      <div class="adm-hdr">
+        <div>
+          <div style="font-size:15px;font-weight:500">🔓 進貨系統已解鎖</div>
+          <div style="font-size:12px;color:#999;margin-top:2px">可調整庫存總數、直接修改數字</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div class="adm-badge">👤 <span id="aul"></span></div>
+          <button class="btn" onclick="LA()">🔒 鎖定</button>
+        </div>
+      </div>
+
+      <table class="adm-table">
+        <thead><tr>
+          <th style="text-align:left;padding-left:14px">SKU</th>
+          <th>10入包</th><th>5入包</th><th>3入包</th>
+          <th>總包數</th><th>總件數</th><th>狀態</th>
+        </tr></thead>
+        <tbody id="atb"></tbody>
+      </table>
+      <div class="diff-preview" id="dp"><div style="font-size:12px;font-weight:600;color:#9B59B6;margin-bottom:6px">📝 本次變更預覽</div><div id="di"></div></div>
+      <div class="save-bar">
+        <div>
+          <div style="font-size:12px;color:#999">橘色框 = 已修改但未儲存</div>
+          <div style="font-size:12px;color:#3B6D11;display:none" id="ss">✓ 已儲存並同步完成</div>
+        </div>
+        <button class="btn btn-save" onclick="SA()" style="height:38px;padding:0 20px;font-size:14px">💾 儲存所有變更</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- ===== 主分類：出貨作業 ===== -->
+  <div id="main-out" class="mainpage">
+    <div class="tabs">
+      <button class="tab active" onclick="ST2('ship')">出貨</button>
+      <button class="tab" onclick="ST2('log')">紀錄</button>
+    </div>
+
+  <div id="tab2-ship" class="page2 active">
     <div class="slabel">出貨作業</div>
     <div class="fr">
       <div class="fg"><label>操作人員</label>
@@ -140,7 +238,7 @@ hr.dv{border:none;border-top:1px solid #eee;margin:1.3rem 0}
     <div class="custom-box" id="cb"><div style="font-size:12px;color:#666;margin-bottom:4px">自訂出貨（輸入要扣的包數）</div><div id="cr"></div></div>
     <div class="fr"><button class="btn btn-out" onclick="DO()">✓ 確認出貨</button></div>
     <hr class="dv">
-    <div class="slabel">進貨作業</div>
+    <div class="slabel">進貨作業（一般進貨，補充包數）</div>
     <div class="fr">
       <div class="fg"><label>操作人員</label><select id="ip"><option value="">選擇人員</option><option>33</option><option>小暄</option><option>子昀</option><option>靜姐</option></select></div>
       <div class="fg"><label>SKU</label><select id="is"></select></div>
@@ -150,66 +248,62 @@ hr.dv{border:none;border-top:1px solid #eee;margin:1.3rem 0}
     </div>
   </div>
 
-  <div id="tab-conv" class="page">
-    <div class="slabel">庫存轉換（女生款 5入組 ⇄ 10入組）</div>
-    <div style="background:#f0f0f0;border-radius:8px;padding:12px 14px;font-size:12px;color:#666;margin-bottom:12px;line-height:1.6">
-      換算比例：<b>1組10入 = 2組5入</b>（同一批貨，只是重新分配給不同銷售規格）。轉換後請記得到 BigOrdr 後台手動調整對應規格的庫存數字。
-    </div>
-    <div class="fg" style="margin-bottom:12px">
-      <label>操作人員</label>
-      <select id="cvp"><option value="">選擇人員</option><option>33</option><option>小暄</option><option>子昀</option><option>靜姐</option></select>
-    </div>
-    <div class="fg" style="margin-bottom:16px">
-      <label>選擇款式</label>
-      <div style="display:flex;gap:8px">
-        <button class="gender-btn gender-male" id="gbtn-male" onclick="SWG('male')">男款</button>
-        <button class="gender-btn gender-female" id="gbtn-female" onclick="SWG('female')">女款</button>
-      </div>
-    </div>
-    <div id="conv-tables"></div>
+  <div id="tab2-log" class="page2"><div id="lc"></div></div>
   </div>
 
-  <div id="tab-log" class="page"><div id="lc"></div></div>
+  <!-- ===== 主分類：行事曆 ===== -->
+  <div id="main-cal" class="mainpage">
 
-  <div id="tab-admin" class="page">
-    <div class="lock-screen" id="ls">
+    <!-- 行事曆：任何人都能看到哪天有排程，不需密碼 -->
+    <div class="slabel">📅 開團行事曆</div>
+    <div id="cal-container"></div>
+
+    <hr class="dv">
+
+    <div class="lock-screen" id="ls-cal">
       <div class="lock-icon">🔐</div>
-      <div style="font-size:18px;font-weight:500;margin-bottom:6px">管理後台</div>
-      <div style="font-size:13px;color:#999;margin-bottom:24px">請輸入您的專屬密碼</div>
+      <div style="font-size:18px;font-weight:500;margin-bottom:6px">行事曆詳情</div>
+      <div style="font-size:13px;color:#999;margin-bottom:24px">請輸入您的專屬密碼，查看完整開團資訊</div>
       <div style="display:flex;gap:8px;align-items:center">
-        <input type="password" class="lock-input" id="pwi" placeholder="密碼" onkeydown="if(event.key==='Enter')CP()"/>
-        <button class="btn tab-admin" onclick="CP()">進入</button>
+        <input type="password" class="lock-input" id="pwi-cal" placeholder="密碼" onkeydown="if(event.key==='Enter')CPCAL()"/>
+        <button class="btn tab-admin" onclick="CPCAL()">進入</button>
       </div>
-      <div class="lock-err" id="pe">密碼錯誤，請再試一次</div>
+      <div class="lock-err" id="pe-cal">密碼錯誤，請再試一次</div>
     </div>
-    <div id="ac" style="display:none">
+
+    <div id="ac-cal" style="display:none">
       <div class="adm-hdr">
         <div>
-          <div style="font-size:15px;font-weight:500">📦 庫存總覽與調整</div>
-          <div style="font-size:12px;color:#999;margin-top:2px">直接修改數字，儲存後即時同步所有人</div>
+          <div style="font-size:15px;font-weight:500">🔓 行事曆詳情已解鎖</div>
+          <div style="font-size:12px;color:#999;margin-top:2px">可新增/查看完整開團排程</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <div class="adm-badge">👤 <span id="aul"></span></div>
-          <button class="btn" onclick="LA()">🔒 鎖定</button>
+          <div class="adm-badge">👤 <span id="aul-cal"></span></div>
+          <button class="btn" onclick="LACAL()">🔒 鎖定</button>
         </div>
       </div>
-      <table class="adm-table">
-        <thead><tr>
-          <th style="text-align:left;padding-left:14px">SKU</th>
-          <th>10入包</th><th>5入包</th><th>3入包</th>
-          <th>總包數</th><th>總件數</th><th>狀態</th>
-        </tr></thead>
-        <tbody id="atb"></tbody>
-      </table>
-      <div class="diff-preview" id="dp"><div style="font-size:12px;font-weight:600;color:#9B59B6;margin-bottom:6px">📝 本次變更預覽</div><div id="di"></div></div>
-      <div class="save-bar">
-        <div>
-          <div style="font-size:12px;color:#999">橘色框 = 已修改但未儲存</div>
-          <div style="font-size:12px;color:#3B6D11;display:none" id="ss">✓ 已儲存並同步完成</div>
-        </div>
-        <button class="btn btn-save" onclick="SA()" style="height:38px;padding:0 20px;font-size:14px">💾 儲存所有變更</button>
+
+      <div style="background:#F5EEF8;border-radius:8px;padding:12px 14px;font-size:12px;color:#7D3C98;margin-bottom:14px;line-height:1.6">
+        新增開團排程：選擇日期區間、輸入網紅名稱、分潤比例、登記人、備註。儲存後所有人在月曆上都能看到「這幾天有排程」，但只有輸入密碼才能看到詳細內容。
       </div>
+      <div class="fr">
+        <div class="fg"><label>開始日期</label><input type="date" id="ev-start"/></div>
+        <div class="fg"><label>結束日期</label><input type="date" id="ev-end"/></div>
+        <div class="fg"><label>合作網紅</label><input type="text" id="ev-kol" placeholder="網紅名稱" style="width:140px"/></div>
+        <div class="fg"><label>分潤比例</label><input type="text" id="ev-rate" placeholder="例：20%" style="width:80px"/></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>登記人（誰談成的）</label>
+          <select id="ev-reg"><option value="">選擇人員</option><option>33</option><option>小暄</option><option>子昀</option><option>靜姐</option></select>
+        </div>
+        <div class="fg" style="flex:1"><label>備註</label><input type="text" id="ev-note" placeholder="備註說明..." style="width:100%"/></div>
+      </div>
+      <div class="fr"><button class="btn btn-save" onclick="ADDEVENT()">＋ 新增開團排程</button></div>
+      <hr class="dv">
+      <div class="slabel">已排程列表</div>
+      <div id="event-list"></div>
     </div>
+
   </div>
 </div>
 
@@ -247,7 +341,17 @@ const DEF={
 const FK=Object.keys(DEF).filter(k=>!k.startsWith('灰'));
 const MK=Object.keys(DEF).filter(k=>k.startsWith('灰'));
 
-let inv={}, logs=[], cau='', snap0={}, adminOpen=false;
+let inv={}, logs=[], cau='', calUser='', snap0={}, adminOpen=false;
+let events=[], calMonth=new Date().getMonth(), calYear=new Date().getFullYear(), isLoggedIn=false;
+
+// 台灣國定假日/連假 2026（可依年度更新）
+const TW_HOLIDAYS={
+  '2026-01-01':'元旦','2026-02-14':'除夕','2026-02-15':'春節','2026-02-16':'春節',
+  '2026-02-17':'春節','2026-02-18':'春節','2026-02-28':'和平紀念日',
+  '2026-04-04':'兒童節','2026-04-05':'清明節','2026-05-01':'勞動節',
+  '2026-06-19':'端午節','2026-09-25':'中秋節','2026-10-10':'國慶日'
+};
+
 
 function tp(sku,d){if(sku.startsWith('灰'))return (d.p4||0)+(d.p20||0);return(d.p10||0)+(d.p5||0)+(d.p3||0);}
 function tc(sku,d){if(sku.startsWith('灰'))return(d.p4||0)*4+(d.p20||0)*20;return(d.p10||0)*10+(d.p5||0)*5+(d.p3||0)*3;}
@@ -395,7 +499,7 @@ function TS(){const n=new Date();return `${n.getFullYear()}/${n.getMonth()+1}/${
 
 async function SV(){
   try{
-    await setDoc(ref,{inv,logs,updatedAt:new Date().toISOString()});
+    await setDoc(ref,{inv,logs,events,updatedAt:new Date().toISOString()});
     document.getElementById('sy').textContent='✓ 已同步 '+TS();
     document.getElementById('sy').className='sync ok';
     return true;
@@ -589,14 +693,131 @@ window.DOCONV=async function(sku,btn){
   alert('✓ 轉換完成！記得到 BigOrdr 後台調整對應規格的庫存數字');
 }
 
+window.MAINNAV=function(name){
+  document.querySelectorAll('.mainpage').forEach(p=>p.classList.remove('active'));
+  document.getElementById('main-'+name).classList.add('active');
+  const order=['inv','out','cal'];
+  document.querySelectorAll('.wrap > .tabs > .tab').forEach((b,i)=>b.classList.toggle('active',order[i]===name));
+  if(name==='cal')RCAL();
+}
+
 window.ST=function(name){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('#main-inv .page').forEach(p=>p.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
-  document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',['female','male','out','conv','log','admin'][i]===name));
-  adminOpen=(name==='admin'&&document.getElementById('ac').style.display!=='none');
-  if(name==='log')RL();
+  document.querySelectorAll('#main-inv > .tabs .tab').forEach((b,i)=>b.classList.toggle('active',['female','male','conv','purchase'][i]===name));
+  adminOpen=(name==='purchase'&&document.getElementById('ac').style.display!=='none');
   if(name==='conv')RCV();
-  if(name==='admin'&&document.getElementById('ac').style.display!=='none')RAT();
+  if(name==='purchase'&&document.getElementById('ac').style.display!=='none')RAT();
+}
+
+window.ST2=function(name){
+  document.querySelectorAll('#main-out .page2').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab2-'+name).classList.add('active');
+  document.querySelectorAll('#main-out > .tabs .tab').forEach((b,i)=>b.classList.toggle('active',['ship','log'][i]===name));
+  if(name==='log')RL();
+}
+
+function dateInRange(dateStr,start,end){
+  return dateStr>=start && dateStr<=end;
+}
+function pad(n){return String(n).padStart(2,'0');}
+
+function RCAL(){
+  const con=document.getElementById('cal-container');
+  con.innerHTML='';
+  const wrap=document.createElement('div');
+  wrap.className='cal-wrap';
+
+  const hdr=document.createElement('div');
+  hdr.className='cal-hdr';
+  hdr.innerHTML=`<button onclick="CALNAV(-1)">‹</button><div class="cal-title">${calYear}年 ${calMonth+1}月</div><button onclick="CALNAV(1)">›</button>`;
+  wrap.appendChild(hdr);
+
+  const grid=document.createElement('div');
+  grid.className='cal-grid';
+  ['日','一','二','三','四','五','六'].forEach(d=>{
+    const el=document.createElement('div');el.className='cal-dow';el.textContent=d;grid.appendChild(el);
+  });
+
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const todayStr=`${new Date().getFullYear()}-${pad(new Date().getMonth()+1)}-${pad(new Date().getDate())}`;
+
+  for(let i=0;i<firstDay;i++){const el=document.createElement('div');el.className='cal-day empty';grid.appendChild(el);}
+
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr=`${calYear}-${pad(calMonth+1)}-${pad(d)}`;
+    const holiday=TW_HOLIDAYS[dateStr];
+    const scheduled=events.some(ev=>dateInRange(dateStr,ev.start,ev.end));
+    const el=document.createElement('div');
+    let cls='cal-day';
+    if(holiday)cls+=' holiday';
+    else if(scheduled)cls+=' scheduled';
+    if(dateStr===todayStr)cls+=' today';
+    el.className=cls;
+    el.innerHTML=`<div class="dnum">${d}</div>${holiday?`<div class="hname">${holiday}</div>`:''}${scheduled?'<div class="ev-dot"></div>':''}`;
+    grid.appendChild(el);
+  }
+  wrap.appendChild(grid);
+
+  const tip=document.createElement('div');
+  tip.className='cal-locked-tip';
+  tip.textContent=isLoggedIn?'點上方「行事曆詳情」查看完整內容':'🔵 藍點代表該日有開團排程，輸入密碼可查看詳情';
+  wrap.appendChild(tip);
+
+  con.appendChild(wrap);
+}
+
+window.CALNAV=function(dir){
+  calMonth+=dir;
+  if(calMonth<0){calMonth=11;calYear--;}
+  if(calMonth>11){calMonth=0;calYear++;}
+  RCAL();
+}
+
+function RENDEREVENTS(){
+  const con=document.getElementById('event-list');
+  if(!events.length){con.innerHTML='<p class="empty">尚無排程</p>';return;}
+  const sorted=[...events].sort((a,b)=>a.start.localeCompare(b.start));
+  con.innerHTML=sorted.map((ev,idx)=>{
+    const realIdx=events.indexOf(ev);
+    return `<div class="event-card">
+      <span class="ev-del" onclick="DELEVENT(${realIdx})">刪除</span>
+      <div class="ev-dates">${ev.start} ～ ${ev.end}</div>
+      <div class="ev-kol">${ev.kol||'-'} <span class="ev-rate">分潤 ${ev.rate||'-'}</span></div>
+      ${ev.note?`<div class="ev-note">${ev.note}</div>`:''}
+      <div style="font-size:11px;color:#aaa;margin-top:4px">登記人：${ev.registeredBy||'-'}</div>
+    </div>`;
+  }).join('');
+}
+
+window.ADDEVENT=async function(){
+  const start=document.getElementById('ev-start').value;
+  const end=document.getElementById('ev-end').value;
+  const kol=document.getElementById('ev-kol').value;
+  const rate=document.getElementById('ev-rate').value;
+  const reg=document.getElementById('ev-reg').value;
+  const note=document.getElementById('ev-note').value;
+  if(!start||!end){alert('請選擇開始與結束日期');return;}
+  if(!kol){alert('請輸入合作網紅名稱');return;}
+  if(!reg){alert('請選擇登記人');return;}
+  events.push({start,end,kol,rate,note,registeredBy:reg,ts:TS()});
+  await setDoc(ref,{inv,logs,events,updatedAt:new Date().toISOString()});
+  document.getElementById('ev-start').value='';
+  document.getElementById('ev-end').value='';
+  document.getElementById('ev-kol').value='';
+  document.getElementById('ev-rate').value='';
+  document.getElementById('ev-reg').value='';
+  document.getElementById('ev-note').value='';
+  RENDEREVENTS();RCAL();
+  alert('✓ 已新增開團排程');
+}
+
+window.DELEVENT=async function(idx){
+  if(!confirm('確定要刪除這筆排程嗎？'))return;
+  events.splice(idx,1);
+  await setDoc(ref,{inv,logs,events,updatedAt:new Date().toISOString()});
+  RENDEREVENTS();RCAL();
 }
 
 window.CP=function(){
@@ -620,6 +841,29 @@ window.LA=function(){
   document.getElementById('ac').style.display='none';
   document.getElementById('pwi').value='';
 }
+
+window.CPCAL=function(){
+  const v=document.getElementById('pwi-cal').value;const u=PW[v];
+  if(u){
+    calUser=u;isLoggedIn=true;
+    document.getElementById('ls-cal').style.display='none';
+    document.getElementById('ac-cal').style.display='block';
+    document.getElementById('aul-cal').textContent=u;
+    document.getElementById('pe-cal').style.display='none';
+    RENDEREVENTS();
+  } else {
+    document.getElementById('pe-cal').style.display='block';
+    document.getElementById('pwi-cal').value='';
+  }
+}
+
+window.LACAL=function(){
+  calUser='';isLoggedIn=false;
+  document.getElementById('ls-cal').style.display='flex';
+  document.getElementById('ac-cal').style.display='none';
+  document.getElementById('pwi-cal').value='';
+}
+
 
 window.SA=async function(){
   document.getElementById('ss').style.display='none';
@@ -748,6 +992,7 @@ async function init(){
     if(snap.exists()){
       const data=snap.data();
       const fi=data.inv||{};
+      events=data.events||[];
       // 檢查是否是新格式（有 p10 key）
       const firstKey=Object.keys(fi)[0];
       if(firstKey && fi[firstKey] && typeof fi[firstKey]==='object' && 'p10' in fi[firstKey]){
@@ -757,32 +1002,37 @@ async function init(){
         // 舊格式或空，用預設值重新初始化
         Object.entries(DEF).forEach(([k,v])=>inv[k]={...v});
         logs=data.logs||[];
-        await setDoc(ref,{inv,logs,updatedAt:new Date().toISOString()});
+        await setDoc(ref,{inv,logs,events,updatedAt:new Date().toISOString()});
       }
     } else {
       // 沒有資料，用預設值初始化
       Object.entries(DEF).forEach(([k,v])=>inv[k]={...v});
-      logs=[];
-      await setDoc(ref,{inv,logs,updatedAt:new Date().toISOString()});
+      logs=[];events=[];
+      await setDoc(ref,{inv,logs,events,updatedAt:new Date().toISOString()});
     }
   }catch(e){
     // Firebase 讀取失敗，用預設值
     Object.entries(DEF).forEach(([k,v])=>inv[k]={...v});
-    logs=[];
+    logs=[];events=[];
   }
-  RAC();RL();
+  RAC();RL();RCAL();
   document.getElementById('sy').textContent='✓ 即時同步中';
   document.getElementById('sy').className='sync ok';
 
-  // 之後監聽更新（但後台開著時不覆蓋）
+  // 之後監聽更新（但後台開著時不覆蓋庫存；行事曆一律更新讓所有人看到最新排程）
   onSnapshot(ref,snap=>{
-    if(adminOpen)return;
     if(snap.exists()){
-      const data=snap.data();const fi=data.inv||{};
-      const firstKey=Object.keys(fi)[0];
-      if(firstKey && fi[firstKey] && typeof fi[firstKey]==='object' && ('p10' in fi[firstKey]||'p4' in fi[firstKey])){
-        inv=fi;logs=data.logs||[];RAC();RL();
+      const data=snap.data();
+      events=data.events||[];
+      if(!adminOpen){
+        const fi=data.inv||{};
+        const firstKey=Object.keys(fi)[0];
+        if(firstKey && fi[firstKey] && typeof fi[firstKey]==='object' && ('p10' in fi[firstKey]||'p4' in fi[firstKey])){
+          inv=fi;logs=data.logs||[];RAC();RL();
+        }
       }
+      RCAL();
+      if(isLoggedIn && document.getElementById('ac-cal').style.display!=='none')RENDEREVENTS();
     }
   },()=>{});
 }
