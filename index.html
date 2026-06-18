@@ -907,17 +907,65 @@ window.SC=function(){
 
 function BCR(){
   const con=document.getElementById('cr');con.innerHTML='';
-  [...FK,...MK].forEach(sku=>{
-    const im=sku.startsWith('灰');const lb=CM[sku.split('-')[0]]+' '+sku.split('-')[1];
-    const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap';
-    row.innerHTML=`<span style="font-size:12px;color:#666;min-width:80px">${lb}</span>
-      ${im?`<input type="number" class="cqty" data-sku="${sku}" data-pack="4" value="0" min="0" placeholder="4入組"/>
-         <input type="number" class="cqty" data-sku="${sku}" data-pack="20" value="0" min="0" placeholder="20入組"/>`:
-        `<input type="number" class="cqty" data-sku="${sku}" data-pack="10" value="0" min="0" placeholder="10入"/>
-         <input type="number" class="cqty" data-sku="${sku}" data-pack="5" value="0" min="0" placeholder="5入"/>
-         <input type="number" class="cqty" data-sku="${sku}" data-pack="3" value="0" min="0" placeholder="3入"/>`}`;
-    con.appendChild(row);
+
+  const FEMALE_COLORS=[
+    {key:'粉',bg:'#FEF0F5',border:'#E8A0BF',text:'#C2185B'},
+    {key:'黃',bg:'#FFFBE8',border:'#F5C842',text:'#8C6D00'},
+    {key:'綠',bg:'#F0F8E8',border:'#7AB648',text:'#4A6E22'}
+  ];
+
+  FEMALE_COLORS.forEach(c=>{
+    const sec=document.createElement('div');
+    sec.style.cssText=`background:${c.bg};border:1.5px solid ${c.border};border-radius:10px;padding:10px 12px;margin-bottom:10px`;
+    const title=document.createElement('div');
+    title.style.cssText=`font-size:12px;font-weight:600;color:${c.text};margin-bottom:6px`;
+    title.textContent=CM[c.key];
+    sec.appendChild(title);
+
+    const hdr=document.createElement('div');
+    hdr.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:4px;padding-left:80px';
+    hdr.innerHTML=`<span style="font-size:10px;color:#999;width:65px;text-align:center">10入</span>
+      <span style="font-size:10px;color:#999;width:65px;text-align:center">5入</span>
+      <span style="font-size:10px;color:#999;width:65px;text-align:center">3入</span>`;
+    sec.appendChild(hdr);
+
+    ['S','M','L','XL','2XL'].forEach(sz=>{
+      const sku=c.key+'-'+sz;
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap';
+      row.innerHTML=`<span style="font-size:12px;color:${c.text};min-width:80px;font-weight:500">${sz}</span>
+         <input type="number" class="cqty" data-sku="${sku}" data-pack="10" value="0" min="0" style="width:65px"/>
+         <input type="number" class="cqty" data-sku="${sku}" data-pack="5" value="0" min="0" style="width:65px"/>
+         <input type="number" class="cqty" data-sku="${sku}" data-pack="3" value="0" min="0" style="width:65px"/>`;
+      sec.appendChild(row);
+    });
+    con.appendChild(sec);
   });
+
+  // 男生款（大象灰）
+  const msec=document.createElement('div');
+  msec.style.cssText='background:#EFEFEF;border:1.5px solid #AAAAAA;border-radius:10px;padding:10px 12px;margin-bottom:10px';
+  const mtitle=document.createElement('div');
+  mtitle.style.cssText='font-size:12px;font-weight:600;color:#555;margin-bottom:6px';
+  mtitle.textContent='大象灰（男生款）';
+  msec.appendChild(mtitle);
+
+  const mhdr=document.createElement('div');
+  mhdr.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:4px;padding-left:80px';
+  mhdr.innerHTML=`<span style="font-size:10px;color:#999;width:65px;text-align:center">4入</span>
+    <span style="font-size:10px;color:#999;width:65px;text-align:center">20入</span>`;
+  msec.appendChild(mhdr);
+
+  MK.forEach(sku=>{
+    const sz=sku.split('-')[1];
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap';
+    row.innerHTML=`<span style="font-size:12px;color:#555;min-width:80px;font-weight:500">${sz}</span>
+       <input type="number" class="cqty" data-sku="${sku}" data-pack="4" value="0" min="0" style="width:65px"/>
+       <input type="number" class="cqty" data-sku="${sku}" data-pack="20" value="0" min="0" style="width:65px"/>`;
+    msec.appendChild(row);
+  });
+  con.appendChild(msec);
 }
 
 window.DO=async function(){
